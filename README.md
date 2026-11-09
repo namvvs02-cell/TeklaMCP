@@ -17,6 +17,7 @@ MCP server (stdio) cho **Tekla Structures 2020 SP14**, dùng với Claude để 
 | Drawing | `delete_drawing_mark` | có, cần `confirm=true` |
 | Drawing | `arrange_marks_column` | xếp tag thành cột; `leaderAtBarEnd`, `straight`; mặc định `dryRun=true` |
 | Drawing | `arrange_marks_row` | xoay tag 90°, xếp hàng ngang, mũi tên thẳng đứng; mặc định `dryRun=true` |
+| Drawing | `drawing_bbs` | không. Bảng thống kê thép (BBS) của cast unit, tính lại từ model theo công thức template `BBS_Auto_5Col`; kèm tổng theo đường kính và cảnh báo Mark trùng/chưa đánh số |
 
 Thay đổi qua Tekla Open API không Ctrl+Z được.
 

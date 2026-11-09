@@ -15,7 +15,7 @@ Package: `D:\TeklaClaude\TeklaMcp\TeklaClaude2020\TeklaClaudeMcp.exe`
 ```
 Thoat han Claude desktop (ca khay he thong) roi mo lai. Tekla 2020 nen mo san model.
 
-## 21 tool
+## 22 tool
 Model (giu ten nhu server cu):
 | Tool | Ghi? |
 |---|---|
@@ -39,6 +39,7 @@ Drawing:
 | move_drawing_mark | CO, mac dinh dryRun=true |
 | arrange_marks_column | CO, mac dinh dryRun=true (xep tag thanh cot; leaderAtBarEnd, straight) |
 | arrange_marks_row | CO, mac dinh dryRun=true (xoay tag 90 do, xep hang ngang, mui ten thang dung) |
+| drawing_bbs | khong (BBS cua cast unit, tinh lai tu model theo template BBS_Auto_5Col) |
 
 ## Luu y
 - Thay doi qua API khong Ctrl+Z duoc trong Tekla.
