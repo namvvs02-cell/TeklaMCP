@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- MCP server rieng cho may pc-whvn00026, Tekla Structures 2020 SP14 (.NET Framework 4.8).
+       Tham chieu truc tiep cac DLL co san trong thu muc TeklaLibs, khong can NuGet. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>TeklaClaudeMcp</AssemblyName>
+    <RootNamespace>TeklaClaudeMcp</RootNamespace>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TeklaLibs>D:\TeklaClaude\TeklaMcp\Tekla2020</TeklaLibs>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ModelContextProtocol"><HintPath>$(TeklaLibs)\ModelContextProtocol.dll</HintPath></Reference>
+    <Reference Include="ModelContextProtocol.Core"><HintPath>$(TeklaLibs)\ModelContextProtocol.Core.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Hosting"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Hosting.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Hosting.Abstractions"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection"><HintPath>$(TeklaLibs)\Microsoft.Extensions.DependencyInjection.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions"><HintPath>$(TeklaLibs)\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Logging"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Logging.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Console"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Logging.Console.dll</HintPath></Reference>
+    <Reference Include="Microsoft.Extensions.Options"><HintPath>$(TeklaLibs)\Microsoft.Extensions.Options.dll</HintPath></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>$(TeklaLibs)\Newtonsoft.Json.dll</HintPath></Reference>
+    <Reference Include="Tekla.Structures"><HintPath>$(TeklaLibs)\Tekla.Structures.dll</HintPath></Reference>
+    <Reference Include="Tekla.Structures.Datatype"><HintPath>$(TeklaLibs)\Tekla.Structures.Datatype.dll</HintPath></Reference>
+    <Reference Include="Tekla.Structures.Model"><HintPath>$(TeklaLibs)\Tekla.Structures.Model.dll</HintPath></Reference>
+    <Reference Include="Tekla.Structures.Drawing"><HintPath>$(TeklaLibs)\Tekla.Structures.Drawing.dll</HintPath></Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <!-- Chep toan bo DLL phu thuoc (Microsoft.Extensions.*, System.*, Tekla.*) vao thu muc build,
+       tru TeklaMcp.exe cu. -->
+  <Target Name="CopyRuntimeLibs" AfterTargets="Build">
+    <ItemGroup>
+      <RuntimeLib Include="$(TeklaLibs)\*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RuntimeLib)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

@@ -55,3 +55,12 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# --- TeklaMCP ---
+# Tekla DLLs are Trimble-licensed: never commit binaries
+*.dll
+*.exe
+*.pdb
+*.nupkg
+# Roslyn compiler downloaded by build_roslyn.ps1
+tools/
