@@ -18,6 +18,8 @@ param(
     [string[]]$TagXY = @(),     # per rebar "x,y" (view coords): tag insertion point; overrides -TagX
     [string[]]$ArrowXY = @(),   # per rebar "x,y": arrow point for a single-leader mark; overrides -Side
     [string]$ExtraText = '',    # second line under the mark text (e.g. "CAPPING BAR", "WALL VER. BAR")
+    [double]$Angle = [double]::NaN,   # mark rotation in degrees (90 = vertical tag, e.g. bars seen as dots in a section)
+    [double]$ArrowY = [double]::NaN,  # bars seen as dots: arrows go to (bar x, ArrowY) instead of the bar end on -Side
     [switch]$Apply,
     [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020",
     [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings"
@@ -146,6 +148,7 @@ foreach ($id in $RebarIds) {
         if ($changed) { $c.Clear(); for ($i = 0; $i -lt $items.Count; $i++) { $c.Add($items[$i]) } }
     }
     $k = [array]::IndexOf($RebarIds, $id)
+    if (-not [double]::IsNaN($Angle)) { $mk.Attributes.RotationAngle = $Angle; $changed = $true }
     if ($TagXY.Count -gt $k -and $TagXY[$k]) {
         $xy = $TagXY[$k] -split ','; $mk.InsertionPoint = New-Object Tekla.Structures.Geometry3d.Point([double]$xy[0], [double]$xy[1], 0); $changed = $true
     } elseif (-not [double]::IsNaN($TagX)) {
@@ -171,6 +174,7 @@ foreach ($id in $RebarIds) {
         if (-not ($ll -is [Tekla.Structures.Drawing.LeaderLine]) -or "$($ll.LeaderLineType)" -ne 'NormalLeaderLine') { continue }
         $sp = $ll.StartPoint
         $near = $ends[$id] | Sort-Object { if ($Side -in 'left', 'right') { [math]::Abs($_.Y - $sp.Y) } else { [math]::Abs($_.X - $sp.X) } } | Select-Object -First 1
+        if (-not [double]::IsNaN($ArrowY)) { $near = New-Object Tekla.Structures.Geometry3d.Point($near.X, $ArrowY, 0) }
         $ll.StartPoint = $near; [void]$ll.Modify()
     }
 }

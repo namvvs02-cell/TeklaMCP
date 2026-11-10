@@ -25,7 +25,9 @@ Thay đổi qua Tekla Open API không Ctrl+Z được.
 
 | Script | Việc làm |
 |---|---|
-| `scripts/place_rebar_marks.ps1` | Lên reinforcement mark với file properties chọn sẵn ngay từ đầu (vd `...Group to one point with Spacing` cho group 2–3 thanh, kiểu leader "Leader lines to one point"). Đặt tag giữa group trong cột tag, mũi tên về đầu thanh, tùy chọn ghi spacing cố định. Chạy thử mặc định; thêm `-Apply` để ghi. |
+| `scripts/place_rebar_marks.ps1` | Lên reinforcement mark với file properties chọn sẵn ngay từ đầu (vd `...Group to one point with Spacing` cho group 2–3 thanh, kiểu leader "Leader lines to one point"). Đặt tag giữa group trong cột tag, mũi tên về đầu thanh, tùy chọn ghi spacing cố định. `-Angle 90` xoay tag, `-ArrowY` cho thanh thấy là chấm trong mặt cắt (mũi tên vào điểm (x thanh, ArrowY)). Chạy thử mặc định; thêm `-Apply` để ghi. |
+| `scripts/add_rebar_dim_marks.ps1` | Tạo rebar dimension mark cho các rebar group, không cần click: nạp `rebar_dim_dial` (mặc định `WH_ArialNarr_2mm_Trans_Rebar Dim_no pic`), chọn thanh, gọi `acmd_create_marks_selected` / `RebarNewDimMark`. Lần đầu Tekla có thể hỏi "Pick position" một lần. |
+| `scripts/set_dim_line_y.ps1` | Dời đường dim nằm ngang (tìm theo khoảng x) tới y mong muốn, lặp gán–đọc lại cho tới khi đúng. Vd `-Spec "240,1840,3400"`. |
 
 Ví dụ:
 
