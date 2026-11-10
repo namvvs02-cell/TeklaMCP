@@ -21,6 +21,23 @@ MCP server (stdio) cho **Tekla Structures 2020 SP14**, dùng với Claude để 
 
 Thay đổi qua Tekla Open API không Ctrl+Z được.
 
+## Script
+
+| Script | Việc làm |
+|---|---|
+| `scripts/place_rebar_marks.ps1` | Lên reinforcement mark với file properties chọn sẵn ngay từ đầu (vd `...Group to one point with Spacing` cho group 2–3 thanh, kiểu leader "Leader lines to one point"). Đặt tag giữa group trong cột tag, mũi tên về đầu thanh, tùy chọn ghi spacing cố định. Chạy thử mặc định; thêm `-Apply` để ghi. |
+
+Ví dụ:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\place_rebar_marks.ps1 -ViewName N -ViewType DetailView -RebarIds 358097497 -Kind group -TagX -966.6 -SpacingText 200 -Apply
+```
+
+Ghi chú về `place_rebar_marks.ps1`:
+- API Tekla 2020 không đặt được kiểu leader của rebar group mark, và `MarkAttributes(obj, file)` không nạp được file `.rm`.
+- Vì vậy script chạy một macro tạm trong `...\macros\drawings`. Macro mở `rebar_mark_dial`, nạp file (`gr_rebar_mark_get_menu` + `gr_rebar_get`) rồi Modify các mark đang chọn. Sau đó script đóng dialog và xóa macro.
+- Khi duyệt `Attributes.Content` trong PowerShell phải dùng `GetEnumerator()`. Nếu dùng `foreach` thì khung oval (`ContainerElement`) bị mở ra và mất.
+
 ## Build
 
 DLL Tekla (`Tekla.Structures*.dll`) có bản quyền Trimble nên **không có trong repo**. Cần một thư mục chứa
