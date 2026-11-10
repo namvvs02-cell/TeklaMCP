@@ -15,6 +15,9 @@ param(
     [double]$TagX = [double]::NaN,
     [ValidateSet('left', 'right', 'bottom', 'top')][string]$Side = 'left',
     [string]$SpacingText = '',
+    [string[]]$TagXY = @(),     # per rebar "x,y" (view coords): tag insertion point; overrides -TagX
+    [string[]]$ArrowXY = @(),   # per rebar "x,y": arrow point for a single-leader mark; overrides -Side
+    [string]$ExtraText = '',    # second line under the mark text (e.g. "CAPPING BAR", "WALL VER. BAR")
     [switch]$Apply,
     [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020",
     [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings"
@@ -135,13 +138,25 @@ foreach ($id in $RebarIds) {
             $prev = if ($i -gt 0) { $items[$i - 1] } else { $null }; $next = if ($i + 1 -lt $items.Count) { $items[$i + 1] } else { $null }
             if (($prev -is [Tekla.Structures.Drawing.TextElement] -and $prev.Value -eq '-') -or ($next -is [Tekla.Structures.Drawing.TextElement] -and $next.Value -eq '-')) { $items.RemoveAt($i); $changed = $true }
         }
+        if ($ExtraText) {
+            $font = $null; foreach ($x in $items) { if ($x.PSObject.Properties['Font'] -and $x.Font) { $font = $x.Font; break } }
+            $t = New-Object "$TSD.TextElement" -ArgumentList $ExtraText; if ($font) { $t.Font = $font }
+            [void]$items.Add((New-Object "$TSD.NewLineElement")); [void]$items.Add($t); $changed = $true
+        }
         if ($changed) { $c.Clear(); for ($i = 0; $i -lt $items.Count; $i++) { $c.Add($items[$i]) } }
     }
-    if (-not [double]::IsNaN($TagX)) {
+    $k = [array]::IndexOf($RebarIds, $id)
+    if ($TagXY.Count -gt $k -and $TagXY[$k]) {
+        $xy = $TagXY[$k] -split ','; $mk.InsertionPoint = New-Object Tekla.Structures.Geometry3d.Point([double]$xy[0], [double]$xy[1], 0); $changed = $true
+    } elseif (-not [double]::IsNaN($TagX)) {
         $axis = if ($Side -in 'left', 'right') { 'Y' } else { 'X' }
         $mid = ($ends[$id] | Measure-Object -Property $axis -Average).Average
         $mk.InsertionPoint = if ($axis -eq 'Y') { New-Object Tekla.Structures.Geometry3d.Point($TagX, $mid, 0) } else { New-Object Tekla.Structures.Geometry3d.Point($mid, $TagX, 0) }
         $changed = $true
+    }
+    if ($ArrowXY.Count -gt $k -and $ArrowXY[$k]) {
+        $xy = $ArrowXY[$k] -split ','
+        $mk.Placing = New-Object "$TSD.LeaderLinePlacing" -ArgumentList (New-Object Tekla.Structures.Geometry3d.Point([double]$xy[0], [double]$xy[1], 0)); $changed = $true
     }
     if ($changed) { [void]$mk.Modify() }
 }
@@ -150,6 +165,7 @@ foreach ($id in $RebarIds) {
 # 4. arrows to the bar ends on -Side (nearest bar per leader)
 $marks = Get-Marks
 foreach ($id in $RebarIds) {
+    $k = [array]::IndexOf($RebarIds, $id); if ($ArrowXY.Count -gt $k -and $ArrowXY[$k]) { continue }   # arrow already set explicitly
     $ch = $marks[$id].GetObjects()
     while ($ch.MoveNext()) { $ll = $ch.Current
         if (-not ($ll -is [Tekla.Structures.Drawing.LeaderLine]) -or "$($ll.LeaderLineType)" -ne 'NormalLeaderLine') { continue }
