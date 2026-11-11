@@ -61,6 +61,8 @@ try {
 function Get-Marks {
     $res = @{}; $e = $tv.GetAllObjects()
     while ($e.MoveNext()) { $o = $e.Current; if (-not ($o -is [Tekla.Structures.Drawing.Mark])) { continue }
+        # hidden marks sit at (0,0) with no content (e.g. left over from a rebar dim mark): not a tag, ignore
+        if ([math]::Abs($o.InsertionPoint.X) -lt 0.5 -and [math]::Abs($o.InsertionPoint.Y) -lt 0.5) { continue }
         $r = $o.GetRelatedObjects(); while ($r.MoveNext()) { if ($r.Current -is [Tekla.Structures.Drawing.ModelObject] -and $RebarIds -contains $r.Current.ModelIdentifier.ID) { $res[$r.Current.ModelIdentifier.ID] = $o } } }
     return $res
 }
@@ -169,11 +171,14 @@ foreach ($id in $RebarIds) {
 $marks = Get-Marks
 foreach ($id in $RebarIds) {
     $k = [array]::IndexOf($RebarIds, $id); if ($ArrowXY.Count -gt $k -and $ArrowXY[$k]) { continue }   # arrow already set explicitly
-    $ch = $marks[$id].GetObjects()
+    $ch = $marks[$id].GetObjects(); $used = @()
     while ($ch.MoveNext()) { $ll = $ch.Current
         if (-not ($ll -is [Tekla.Structures.Drawing.LeaderLine]) -or "$($ll.LeaderLineType)" -ne 'NormalLeaderLine') { continue }
         $sp = $ll.StartPoint
-        $near = $ends[$id] | Sort-Object { if ($Side -in 'left', 'right') { [math]::Abs($_.Y - $sp.Y) } else { [math]::Abs($_.X - $sp.X) } } | Select-Object -First 1
+        # one leader per bar: nearest bar not yet taken (leaders of a new mark often start at the same point)
+        $free = @($ends[$id] | Where-Object { $used -notcontains $_ }); if ($free.Count -eq 0) { $free = $ends[$id] }
+        $near = $free | Sort-Object { if ($Side -in 'left', 'right') { [math]::Abs($_.Y - $sp.Y) } else { [math]::Abs($_.X - $sp.X) } } | Select-Object -First 1
+        $used += $near
         if (-not [double]::IsNaN($ArrowY)) { $near = New-Object Tekla.Structures.Geometry3d.Point($near.X, $ArrowY, 0) }
         $ll.StartPoint = $near; [void]$ll.Modify()
     }
