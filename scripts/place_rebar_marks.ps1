@@ -62,7 +62,8 @@ function Get-Marks {
     $res = @{}; $e = $tv.GetAllObjects()
     while ($e.MoveNext()) { $o = $e.Current; if (-not ($o -is [Tekla.Structures.Drawing.Mark])) { continue }
         # hidden marks sit at (0,0) with no content (e.g. left over from a rebar dim mark): not a tag, ignore
-        if ([math]::Abs($o.InsertionPoint.X) -lt 0.5 -and [math]::Abs($o.InsertionPoint.Y) -lt 0.5) { continue }
+        # (a mark just created by the API also sits at (0,0), but it has Tekla's default content: keep it)
+        if ([math]::Abs($o.InsertionPoint.X) -lt 0.5 -and [math]::Abs($o.InsertionPoint.Y) -lt 0.5 -and $o.Attributes.Content.Count -eq 0) { continue }
         $r = $o.GetRelatedObjects(); while ($r.MoveNext()) { if ($r.Current -is [Tekla.Structures.Drawing.ModelObject] -and $RebarIds -contains $r.Current.ModelIdentifier.ID) { $res[$r.Current.ModelIdentifier.ID] = $o } } }
     return $res
 }
@@ -85,6 +86,8 @@ foreach ($id in $RebarIds) { if (-not $marks.ContainsKey($id)) { $mk = New-Objec
 # 2. load property file + Modify on the selected marks (temporary macro)
 $sel = $dh.GetDrawingObjectSelector(); [void]$sel.UnselectAllObjects()
 $al = New-Object System.Collections.ArrayList; foreach ($id in $RebarIds) { [void]$al.Add($marks[$id]) }; [void]$sel.SelectObjects($al, $false)
+function Get-ContentKey($mk) { $k = ''; $en = $mk.Attributes.Content.GetEnumerator(); while ($en.MoveNext()) { $x = $en.Current; $k += $x.GetType().Name; if ($x.PSObject.Properties['Name']) { $k += ":" + $x.Name }; $k += ';' }; $k }
+$before = @{}; foreach ($id in $RebarIds) { [void]$marks[$id].Select(); $before[$id] = Get-ContentKey $marks[$id] }
 $macroName = "Claude_ApplyRebarMark.cs"
 @"
 #pragma warning disable 1633
@@ -105,9 +108,15 @@ akit.PushButton("mark_modify", "rebar_mark_dial");
 "@ | Set-Content -Path (Join-Path $MacroDir $macroName) -Encoding utf8
 try {
     [void][Tekla.Structures.Model.Operations.Operation]::RunMacro("..\drawings\$macroName")
+    # A new mark already has Tekla's default content, so "not empty" is no proof the macro ran: wait until the
+    # content of every mark changed (closing the dialog earlier cancels the Modify). Marks that already had the
+    # file's content do not change; after the timeout they are accepted when not empty.
     $deadline = (Get-Date).AddSeconds(15)
-    do { Start-Sleep -Milliseconds 700; $marks = Get-Marks; $ready = $true; foreach ($id in $RebarIds) { [void]$marks[$id].Select(); if ($marks[$id].Attributes.Content.Count -eq 0) { $ready = $false } } } until ($ready -or (Get-Date) -gt $deadline)
-    if (-not $ready) { throw "marks still empty after macro - check that the property file exists in the model attributes folder" }
+    do { Start-Sleep -Milliseconds 700; $marks = Get-Marks; $ready = $true; $filled = $true
+         foreach ($id in $RebarIds) { [void]$marks[$id].Select(); if ($marks[$id].Attributes.Content.Count -eq 0) { $filled = $false }
+             if ((Get-ContentKey $marks[$id]) -eq $before[$id]) { $ready = $false } } } until ($ready -or (Get-Date) -gt $deadline)
+    if (-not $filled) { throw "marks still empty after macro - check that the property file exists in the model attributes folder" }
+    Start-Sleep -Milliseconds 1500
 } finally {
     Get-ChildItem $MacroDir -Filter "Claude_ApplyRebarMark.cs*" | Remove-Item -Force
     # close the dialog the macro left open (WM_CLOSE = Cancel; the Modify is already done)
