@@ -1,10 +1,12 @@
-# Places rebar marks with the agreed mark properties loaded from the start, in one run.
-#   1. Make sure every rebar has a mark in the view (creates an empty one with the API if missing).
-#   2. Selects the marks and runs a temporary macro: open "rebar_mark_dial", load the property file, Modify.
-#      This is how the leader type (e.g. "Leader lines to one point") gets set - the 2020 API cannot set it.
-#   3. Optional: replaces <<cc target>> with fixed text (-SpacingText), moves the tag to the tag column
-#      (-TagX, centred on the bars), and moves each arrow to the bar end on -Side.
-# Dry run by default; add -Apply to write. Tekla 2020, drawing open.
+# Places existing rebar marks (tags) and their arrows, and fixes their content, in one run.
+#   1. Missing marks are created as real reinforcement marks with the property file by add_rebar_marks_applied.ps1
+#      (same folder: dialog Apply + acmdCreateAppliedMarksSelected). Never "new Mark(rebar)": Tekla treats that as an
+#      associated note, and the 2020 API cannot set the leader type ("Leader lines to one point").
+#      Marks that already exist keep their properties (the old dialog Modify step was removed 2026-11-17: it pushed
+#      buttons of other dialogs and did nothing).
+#   2. Optional: replaces <<cc target>> with fixed text (-SpacingText), removes spaces around "-", moves the tag to the
+#      tag column (-TagX, centred on the bars), and moves each arrow to the bar end on -Side.
+# Dry run by default; add -Apply to write. Tekla 2020, drawing open and not frozen.
 # Example: .\place_rebar_marks.ps1 -ViewName N -ViewType DetailView -RebarIds 358097497 -Kind group -TagX -966.6 -SpacingText 200 -Apply
 param(
     [Parameter(Mandatory)][int[]]$RebarIds,
@@ -70,70 +72,22 @@ function Get-Marks {
 $marks = Get-Marks
 foreach ($id in $RebarIds) {
     $n = $ends[$id].Count
-    $info = "rebar $id : $n bar(s), mark " + $(if ($marks.ContainsKey($id)) { "exists" } else { "missing -> will create" })
+    $info = "rebar $id : $n bar(s), mark " + $(if ($marks.ContainsKey($id)) { "exists" } else { "missing -> will create with add_rebar_marks_applied.ps1" })
     if (-not [double]::IsNaN($TagX)) { $info += ", tag at ({0:F1},{1:F1})" -f $TagX, (($ends[$id] | Measure-Object -Property Y -Average).Average) }
     $info
 }
 "property file: $PropertyFile"
 if (-not $Apply) { "dry run - add -Apply to write"; return }
 
-# 1. create missing marks
-$e = $tv.GetAllObjects(); $rbs = @{}
-while ($e.MoveNext()) { $o = $e.Current; if ($o -is [Tekla.Structures.Drawing.ReinforcementBase] -and $RebarIds -contains $o.ModelIdentifier.ID) { $rbs[$o.ModelIdentifier.ID] = $o } }
-foreach ($id in $RebarIds) { if (-not $marks.ContainsKey($id)) { $mk = New-Object "$TSD.Mark" -ArgumentList $rbs[$id]; [void]$mk.Insert() } }
-[void]$dwg.CommitChanges(); $marks = Get-Marks
-
-# 2. load property file + Modify on the selected marks (temporary macro)
-$sel = $dh.GetDrawingObjectSelector(); [void]$sel.UnselectAllObjects()
-$al = New-Object System.Collections.ArrayList; foreach ($id in $RebarIds) { [void]$al.Add($marks[$id]) }; [void]$sel.SelectObjects($al, $false)
-function Get-ContentKey($mk) { $k = ''; $en = $mk.Attributes.Content.GetEnumerator(); while ($en.MoveNext()) { $x = $en.Current; $k += $x.GetType().Name; if ($x.PSObject.Properties['Name']) { $k += ":" + $x.Name }; $k += ';' }; $k }
-$before = @{}; foreach ($id in $RebarIds) { [void]$marks[$id].Select(); $before[$id] = Get-ContentKey $marks[$id] }
-$macroName = "Claude_ApplyRebarMark.cs"
-@"
-#pragma warning disable 1633
-#pragma reference "Tekla.Macros.Akit"
-#pragma reference "Tekla.Macros.Runtime"
-#pragma warning restore 1633
-namespace UserMacros { public sealed class Macro { [Tekla.Macros.Runtime.MacroEntryPointAttribute()]
-public static void Run(Tekla.Macros.Runtime.IMacroRuntime runtime) {
-Tekla.Macros.Akit.IAkitScriptHost akit = runtime.Get<Tekla.Macros.Akit.IAkitScriptHost>();
-akit.Callback("acmd_display_attr_dialog", "rebar_mark_dial", "main_frame");
-akit.ValueChange("rebar_mark_dial", "gr_rebar_mark_get_menu", "$PropertyFile");
-akit.PushButton("gr_rebar_get", "rebar_mark_dial");
-akit.PushButton("rebar_modify", "rebar_mark_dial");
-akit.PushButton("rebar_mark_modify", "rebar_mark_dial");
-akit.PushButton("dia_modify", "rebar_mark_dial");
-akit.PushButton("mark_modify", "rebar_mark_dial");
-}}}
-"@ | Set-Content -Path (Join-Path $MacroDir $macroName) -Encoding utf8
-try {
-    [void][Tekla.Structures.Model.Operations.Operation]::RunMacro("..\drawings\$macroName")
-    # A new mark already has Tekla's default content, so "not empty" is no proof the macro ran: wait until the
-    # content of every mark changed (closing the dialog earlier cancels the Modify). Marks that already had the
-    # file's content do not change; after the timeout they are accepted when not empty.
-    $deadline = (Get-Date).AddSeconds(15)
-    do { Start-Sleep -Milliseconds 700; $marks = Get-Marks; $ready = $true; $filled = $true
-         foreach ($id in $RebarIds) { [void]$marks[$id].Select(); if ($marks[$id].Attributes.Content.Count -eq 0) { $filled = $false }
-             if ((Get-ContentKey $marks[$id]) -eq $before[$id]) { $ready = $false } } } until ($ready -or (Get-Date) -gt $deadline)
-    if (-not $filled) { throw "marks still empty after macro - check that the property file exists in the model attributes folder" }
-    Start-Sleep -Milliseconds 1500
-} finally {
-    Get-ChildItem $MacroDir -Filter "Claude_ApplyRebarMark.cs*" | Remove-Item -Force
-    # close the dialog the macro left open (WM_CLOSE = Cancel; the Modify is already done)
-    # (FindWindow by title does not find it; enumerate top-level windows instead)
-    if (-not ('ClaudeWin' -as [type])) { Add-Type @'
-using System; using System.Text; using System.Runtime.InteropServices;
-public class ClaudeWin { public delegate bool P(IntPtr h, IntPtr l);
-[DllImport("user32.dll")] public static extern bool EnumWindows(P p, IntPtr l);
-[DllImport("user32.dll")] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
-[DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
-[DllImport("user32.dll")] public static extern IntPtr PostMessage(IntPtr h, uint m, IntPtr w, IntPtr l);
-public static IntPtr Find(string title) { IntPtr r = IntPtr.Zero; EnumWindows((h, l) => { if (IsWindowVisible(h)) { var s = new StringBuilder(256); GetWindowText(h, s, 256); if (s.ToString().Trim() == title) { r = h; return false; } } return true; }, IntPtr.Zero); return r; } }
-'@ }
-    $hw = [ClaudeWin]::Find("Reinforcement Mark Properties"); if ($hw -ne [IntPtr]::Zero) { [void][ClaudeWin]::PostMessage($hw, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero) }
+# 1. create missing marks as real reinforcement marks (property file + leader type from the dialog)
+$missing = @($RebarIds | Where-Object { -not $marks.ContainsKey($_) })
+if ($missing.Count) {
+    & (Join-Path $PSScriptRoot 'add_rebar_marks_applied.ps1') -RebarIds $missing -ViewName $ViewName -ViewType $ViewType -PropertyFile $PropertyFile
+    $marks = Get-Marks
+    foreach ($id in $missing) { if (-not $marks.ContainsKey($id)) { throw "no mark was created for rebar $id - stop, do not retry (see PPVC_Drawing_workflow.md)" } }
 }
 
-# 3. spacing text + tag position (mark level first; leader edits must come last, a mark Modify resets them)
+# 2. spacing text + tag position (mark level first; leader edits must come last, a mark Modify resets them)
 foreach ($id in $RebarIds) {
     $mk = $marks[$id]; [void]$mk.Select(); $changed = $false
     if ($true) {
@@ -145,7 +99,7 @@ foreach ($id in $RebarIds) {
             if ($SpacingText -and $x.GetType().Name -eq 'LengthPropertyElement' -and $x.Name -eq 'CC_TARGET') {
                 $t = New-Object "$TSD.TextElement" -ArgumentList $SpacingText; $t.Font = $x.Font; [void]$items.Add($t); $changed = $true
             } else { [void]$items.Add($x) } }
-        # the property file leaves a space on both sides of "-"; the agreed look is "2H16-200" (no spaces)
+        # older property files leave a space on both sides of "-"; the agreed look is "2H16-200" (no spaces)
         for ($i = $items.Count - 1; $i -ge 0; $i--) {
             if ($items[$i].GetType().Name -ne 'SpaceElement') { continue }
             $prev = if ($i -gt 0) { $items[$i - 1] } else { $null }; $next = if ($i + 1 -lt $items.Count) { $items[$i + 1] } else { $null }
@@ -176,7 +130,7 @@ foreach ($id in $RebarIds) {
 }
 [void]$dwg.CommitChanges()
 
-# 4. arrows to the bar ends on -Side (nearest bar per leader)
+# 3. arrows to the bar ends on -Side (nearest bar per leader)
 $marks = Get-Marks
 foreach ($id in $RebarIds) {
     $k = [array]::IndexOf($RebarIds, $id); if ($ArrowXY.Count -gt $k -and $ArrowXY[$k]) { continue }   # arrow already set explicitly
