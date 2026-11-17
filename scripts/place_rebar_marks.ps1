@@ -44,6 +44,9 @@ $model = New-Object Tekla.Structures.Model.Model
 $wph = $model.GetWorkPlaneHandler(); $savedPlane = $wph.GetCurrentTransformationPlane()
 $ends = @{}
 try {
+    # reset to the global plane first: when the user has rotated the model work plane, setting the view plane directly
+    # gives wrong bar coordinates (seen 2026-11-17, PPVC07a: x ~17000 instead of view coordinates)
+    [void]$wph.SetCurrentTransformationPlane((New-Object Tekla.Structures.Model.TransformationPlane))
     [void]$wph.SetCurrentTransformationPlane((New-Object Tekla.Structures.Model.TransformationPlane($tv.DisplayCoordinateSystem)))
     foreach ($id in $RebarIds) {
         $mo = $model.SelectModelObject((New-Object Tekla.Structures.Identifier($id)))
