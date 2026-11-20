@@ -6,7 +6,7 @@
 param([Parameter(Mandatory)][int[]]$RebarIds,[string]$ViewName='W',[string]$ViewType='SectionView',
       [string]$PropertyFile='WH_ArialNarr_2mm_Trans_Rebar Group to one point with Spacing',[string]$CmdParam='',[string]$Cmd='acmdCreateAppliedMarksSelected',[string]$LogFile=(Join-Path $env:TEMP 'claude_rebar_mark_macro_log.txt'),
       [string]$MacroDir="C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
-$env:SESSIONNAME="Console"; $T="D:\TeklaClaude\TeklaMcp\Tekla2020"
+$env:SESSIONNAME="Console"; $T="C:\TeklaClaude\TeklaMcp\Tekla2020"
 Add-Type -Path "$T\Tekla.Structures.dll"; Add-Type -Path "$T\Tekla.Structures.Model.dll"; Add-Type -Path "$T\Tekla.Structures.Drawing.dll"
 if (-not ('TkWin2' -as [type])) { Add-Type @"
 using System; using System.Text; using System.Runtime.InteropServices;

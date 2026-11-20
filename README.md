@@ -49,7 +49,7 @@ thư mục server đã cài (`TeklaClaude2020`) có đủ.
 Không cần Visual Studio:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build_roslyn.ps1 -LibDir D:\TeklaClaude\TeklaMcp\TeklaClaude2020
+powershell -ExecutionPolicy Bypass -File build_roslyn.ps1 -LibDir C:\TeklaClaude\TeklaMcp\TeklaClaude2020
 # build + thay exe đang chạy (exe cũ được đổi tên .old-<giờ>.exe):
 powershell -ExecutionPolicy Bypass -File build_roslyn.ps1 -Deploy
 ```
@@ -61,7 +61,7 @@ Có Visual Studio 2019/2022: `TeklaClaudeMcp\build.bat`.
 ```json
 "mcpServers": {
   "tekla-2020": {
-    "command": "D:\\TeklaClaude\\TeklaMcp\\TeklaClaude2020\\TeklaClaudeMcp.exe",
+    "command": "C:\\TeklaClaude\\TeklaMcp\\TeklaClaude2020\\TeklaClaudeMcp.exe",
     "env": { "SESSIONNAME": "Console" }
   }
 }

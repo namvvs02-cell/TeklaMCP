@@ -1,14 +1,14 @@
 @echo off
 rem ============================================================
 rem  Build TeklaClaudeMcp cho Tekla Structures 2020 SP14 (net48)
-rem  Ket qua: D:\TeklaClaude\TeklaMcp\TeklaClaude2020\TeklaClaudeMcp.exe
+rem  Ket qua: C:\TeklaClaude\TeklaMcp\TeklaClaude2020\TeklaClaudeMcp.exe
 rem ============================================================
 setlocal
 
 set "PROJ=%~dp0TeklaClaudeMcp.csproj"
 set "OUT=%~dp0bin\Release\net48"
-set "DEPLOY=D:\TeklaClaude\TeklaMcp\TeklaClaude2020"
-set "TEKLALIBS=D:\TeklaClaude\TeklaMcp\Tekla2020"
+set "DEPLOY=C:\TeklaClaude\TeklaMcp\TeklaClaude2020"
+set "TEKLALIBS=C:\TeklaClaude\TeklaMcp\Tekla2020"
 set "MSB="
 
 if not exist "%TEKLALIBS%\Tekla.Structures.Drawing.dll" (

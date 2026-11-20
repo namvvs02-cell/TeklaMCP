@@ -6,7 +6,7 @@
 # Move the dim line afterwards with set_dim_line_y.ps1 (the pick only sets a rough position).
 param([Parameter(Mandatory)][int[]]$RebarIds, [string]$ViewName = "U", [string]$ViewType = "SectionView",
       [string]$PropertyFile = "WH_ArialNarr_2mm_Trans_Rebar Dim_no pic_cc max",
-      [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020", [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
+      [string]$TeklaDir = "C:\TeklaClaude\TeklaMcp\Tekla2020", [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
 $env:SESSIONNAME = "Console"
 Add-Type -Path "$TeklaDir\Tekla.Structures.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Model.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Drawing.dll"
 if (-not ('TkWin' -as [type])) { Add-Type @"

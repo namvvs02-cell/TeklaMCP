@@ -14,7 +14,7 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <TeklaLibs>D:\TeklaClaude\TeklaMcp\Tekla2020</TeklaLibs>
+    <TeklaLibs>C:\TeklaClaude\TeklaMcp\Tekla2020</TeklaLibs>
   </PropertyGroup>
 
   <ItemGroup>

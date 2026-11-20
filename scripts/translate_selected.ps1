@@ -18,7 +18,7 @@
 #   Cover-ups are invisible to the API: the guard cannot count or check them. The user checks them by eye.
 param([double]$DX = 0, [double]$DY = 0, [switch]$Copy, [int[]]$SelectIds = @(), [string]$Window = "View_10 window_1",
       [string]$Box = "", [switch]$DryRun, [switch]$Force,
-      [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020",
+      [string]$TeklaDir = "C:\TeklaClaude\TeklaMcp\Tekla2020",
       [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
 if (-not $env:SESSIONNAME) { $env:SESSIONNAME = "Console" }
 Add-Type -Path "$TeklaDir\Tekla.Structures.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Model.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Drawing.dll"

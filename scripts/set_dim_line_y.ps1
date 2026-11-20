@@ -1,5 +1,5 @@
 # Iteratively moves horizontal dim sets (matched by x range) until the dim line sits at the target y.
-param([string[]]$Spec, [string]$ViewName = "W", [int]$Iter = 4, [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020")
+param([string[]]$Spec, [string]$ViewName = "W", [int]$Iter = 4, [string]$TeklaDir = "C:\TeklaClaude\TeklaMcp\Tekla2020")
 if (-not $env:SESSIONNAME) { $env:SESSIONNAME = "Console" }
 Add-Type -Path "$TeklaDir\Tekla.Structures.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Model.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Drawing.dll"
 $dh = New-Object Tekla.Structures.Drawing.DrawingHandler

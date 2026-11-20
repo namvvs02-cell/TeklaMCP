@@ -6,7 +6,7 @@
 # -PropertyFile "WH_ArialNarr_2mm_Trans_Rebar Dim_no pic_ADDITIONAL BAR TEXT" (same content + tag D "ADDITIONAL BAR").
 param([Parameter(Mandatory)][int[]]$RebarIds, [string]$ViewName = "W", [string]$ViewType = "",
       [string]$PropertyFile = "WH_ArialNarr_2mm_Trans_Rebar Dim_no pic_cc max", [string]$Window = "View_10 window_1",
-      [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020", [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
+      [string]$TeklaDir = "C:\TeklaClaude\TeklaMcp\Tekla2020", [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings")
 if (-not $env:SESSIONNAME) { $env:SESSIONNAME = "Console" }
 Add-Type -Path "$TeklaDir\Tekla.Structures.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Model.dll"; Add-Type -Path "$TeklaDir\Tekla.Structures.Drawing.dll"
 $dh = New-Object Tekla.Structures.Drawing.DrawingHandler

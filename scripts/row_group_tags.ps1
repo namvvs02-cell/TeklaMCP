@@ -2,7 +2,7 @@
 # InsertionPoint is the mark centre, so the script aligns the bounding box: top row by its bottom edge (TopY), bottom row by its top edge (BotY).
 # Used 2026-11-17 for the group tags of PPVC07a W_40 view W (roof bars cut as dots).
 param([string[]]$Spec,[string]$ViewName='W',[string]$ViewType='SectionView',[double]$TopY=3300,[double]$BotY=2200,[double]$DotY=2867)
-$env:SESSIONNAME="Console"; $T="D:\TeklaClaude\TeklaMcp\Tekla2020"
+$env:SESSIONNAME="Console"; $T="C:\TeklaClaude\TeklaMcp\Tekla2020"
 Add-Type -Path "$T\Tekla.Structures.dll"; Add-Type -Path "$T\Tekla.Structures.Model.dll"; Add-Type -Path "$T\Tekla.Structures.Drawing.dll"
 $dh=New-Object Tekla.Structures.Drawing.DrawingHandler; $dwg=$dh.GetActiveDrawing()
 function TV { $ve=$dwg.GetSheet().GetAllViews(); while($ve.MoveNext()){ $w=$ve.Current; if($w -is [Tekla.Structures.Drawing.View] -and $w.Name -eq $ViewName -and "$($w.ViewType)" -eq $ViewType){ return $w } } }

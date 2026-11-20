@@ -12,8 +12,8 @@
   The deployed server folder already has all of them.
 #>
 param(
-    [string]$LibDir = "D:\TeklaClaude\TeklaMcp\TeklaClaude2020",
-    [string]$DeployDir = "D:\TeklaClaude\TeklaMcp\TeklaClaude2020",
+    [string]$LibDir = "C:\TeklaClaude\TeklaMcp\TeklaClaude2020",
+    [string]$DeployDir = "C:\TeklaClaude\TeklaMcp\TeklaClaude2020",
     [switch]$Deploy,
     [string]$RoslynVersion = "4.8.0"
 )

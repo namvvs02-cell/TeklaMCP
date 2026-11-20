@@ -9,7 +9,7 @@
 # separate scripts. This merged script was only dry-run tested there; the restore for single-leader marks (Placing) is untested.
 param([Parameter(Mandatory)][int[]]$RebarIds,[string]$ViewName='',[string]$ViewType='',
       [switch]$RemoveDashSpaces,[string]$CcText='',[switch]$Apply)
-$env:SESSIONNAME="Console"; $T="D:\TeklaClaude\TeklaMcp\Tekla2020"
+$env:SESSIONNAME="Console"; $T="C:\TeklaClaude\TeklaMcp\Tekla2020"
 Add-Type -Path "$T\Tekla.Structures.dll"; Add-Type -Path "$T\Tekla.Structures.Model.dll"; Add-Type -Path "$T\Tekla.Structures.Drawing.dll"
 if(-not $RemoveDashSpaces -and -not $CcText){ throw "Give -RemoveDashSpaces and/or -CcText" }
 $dh=New-Object Tekla.Structures.Drawing.DrawingHandler; $dwg=$dh.GetActiveDrawing()

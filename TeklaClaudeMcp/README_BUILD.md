@@ -1,14 +1,14 @@
 # TeklaClaudeMcp 2.0 - Tekla Structures 2020 SP14 (may pc-whvn00026)
 
 Mot MCP server duy nhat cho ca MODEL va DRAWING.
-Package: `D:\TeklaClaude\TeklaMcp\TeklaClaude2020\TeklaClaudeMcp.exe`
-(.NET Framework 4.8, x64, bien dich voi DLL Tekla 2020 lay tu `D:\TeklaClaude\TeklaMcp\Tekla2020`).
+Package: `C:\TeklaClaude\TeklaMcp\TeklaClaude2020\TeklaClaudeMcp.exe`
+(.NET Framework 4.8, x64, bien dich voi DLL Tekla 2020 lay tu `C:\TeklaClaude\TeklaMcp\Tekla2020`).
 
 ## Dang ky vao Claude desktop (thay toan bo khoi mcpServers)
 ```json
 "mcpServers": {
   "tekla-2020": {
-    "command": "D:\\TeklaClaude\\TeklaMcp\\TeklaClaude2020\\TeklaClaudeMcp.exe",
+    "command": "C:\\TeklaClaude\\TeklaMcp\\TeklaClaude2020\\TeklaClaudeMcp.exe",
     "env": { "SESSIONNAME": "Console" }
   }
 }

@@ -1,9 +1,9 @@
 ﻿# TeklaTools: one window to run every Tekla tool Claude built, by hand, without Claude.
 #  - MCP tools: talks to TeklaClaudeMcp.exe over stdio (same exe Claude uses), form built from each tool's schema.
 #  - Script tools (.ps1): form built from the script's param() block, run with powershell.exe.
-# Start: TeklaTools.bat in D:\TeklaClaude (or: powershell -ExecutionPolicy Bypass -STA -File TeklaTools.ps1)
+# Start: TeklaTools.bat in C:\TeklaClaude (or: powershell -ExecutionPolicy Bypass -STA -File TeklaTools.ps1)
 # Tekla 2020 must be running with the model / drawing open.
-param([string]$Root = "D:\TeklaClaude", [switch]$SelfTest, [string]$Snapshot = "")
+param([string]$Root = "C:\TeklaClaude", [switch]$SelfTest, [string]$Snapshot = "")
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 Add-Type -AssemblyName System.Web.Extensions

@@ -23,7 +23,7 @@ param(
     [double]$Angle = [double]::NaN,   # mark rotation in degrees (90 = vertical tag, e.g. bars seen as dots in a section)
     [double]$ArrowY = [double]::NaN,  # bars seen as dots: arrows go to (bar x, ArrowY) instead of the bar end on -Side
     [switch]$Apply,
-    [string]$TeklaDir = "D:\TeklaClaude\TeklaMcp\Tekla2020",
+    [string]$TeklaDir = "C:\TeklaClaude\TeklaMcp\Tekla2020",
     [string]$MacroDir = "C:\TeklaStructures\2020.0\Environments\common\macros\drawings"
 )
 $ErrorActionPreference = 'Stop'
